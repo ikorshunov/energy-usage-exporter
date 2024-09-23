@@ -1,0 +1,17 @@
+{
+  "name": "energy-usage-exporter",
+  "version": "1.0.0",
+  "description": "A CLI utility for exporting energy usage data from eloverblik.dk",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "node src/main.ts"
+  },
+  "keywords": [
+    "energy",
+    "usage",
+    "exporter"
+  ],
+  "author": "Ilia Korshunov",
+  "license": "MIT",
+  "dependencies": {}
+}
