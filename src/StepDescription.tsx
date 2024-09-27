@@ -1,17 +1,15 @@
 import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
 import React from "react";
-
-export type StepStatus = "pending" | "completed" | "failed";
-export type StepConfig = Record<StepStatus, { description: string }>;
+import { StepStatus } from "./flow.js";
 
 type StepProps = {
   status: StepStatus;
-  config: StepConfig;
+  description: string;
 };
 
-export const Step = (props: StepProps) => {
-  const { status, config } = props;
+export const StepDescription = (props: StepProps) => {
+  const { status, description } = props;
 
   return (
     <Box gap={1}>
@@ -24,7 +22,7 @@ export const Step = (props: StepProps) => {
           "x"
         )}
       </Text>
-      <Text>{config[status].description}</Text>
+      <Text>{description}</Text>
     </Box>
   );
 };
