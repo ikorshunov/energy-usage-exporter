@@ -6,20 +6,30 @@ export type StepId =
   | "customer-id-type"
   | "customer-id-value";
 
-export type Step = {
-  id: StepId;
+export type StepCallback<T extends StepId> = (data: StepState<T>) => void;
+export type StepFailCallback = VoidFunction;
+export type StepCallbacks<T extends StepId> = {
+  onComplete: StepCallback<T>;
+  onDataChange?: StepCallback<T>;
+  onFail?: StepFailCallback;
+};
+
+export type Step<T extends StepId = StepId> = {
+  id: T;
   description:
     | Record<StepStatus, string>
     | ((state: StepsState) => Record<StepStatus, string>);
   status: (state: StepsState) => StepStatus;
-  render?: (state: StepsState) => JSX.Element; // TODO remove optional when implemented
+  render?: (state: StepsState, callbacks: StepCallbacks<T>) => JSX.Element; // TODO remove optional when implemented
   nextSteps?: {
     completed?: StepId[];
     failed?: StepId[];
   };
 };
 
-export type StepsConfig = Record<StepId, Step>;
+export type StepsConfig = {
+  [K in StepId]: Step<K>;
+};
 
 export type StepDataMap = {
   "auth-token": {

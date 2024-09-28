@@ -1,5 +1,6 @@
 import React from "react";
 import { StepsConfig } from "./types.js";
+import { AuthTokenStep } from "./components/AuthTokenStep.js";
 
 export const config: StepsConfig = {
   "auth-token": {
@@ -9,9 +10,19 @@ export const config: StepsConfig = {
         state["auth-token"]?.authToken === undefined
           ? "Looking for auth token..."
           : "Provide auth token:",
-      completed: "Auth token found",
+      completed: "Auth token",
       failed: "Missing auth token",
     }),
+    render: (_state, callbacks) => {
+      return (
+        <AuthTokenStep
+          id="auth-token"
+          onDataChange={callbacks.onDataChange}
+          onComplete={callbacks.onComplete}
+          onFail={callbacks.onFail}
+        />
+      );
+    },
     status: (state) => {
       const { authToken } = state["auth-token"] || {};
 

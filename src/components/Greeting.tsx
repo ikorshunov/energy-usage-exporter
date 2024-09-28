@@ -1,7 +1,7 @@
 import { Box, Text } from "ink";
 import React from "react";
 
-const GREETING_MESSAGE = "Hej! Håber dette hjælper dig, Sebastian :)";
+const GREETING_MESSAGE = "Hej, Sebastian! Håber dette hjælper dig :)";
 
 export const Greeting = () => {
   return (
