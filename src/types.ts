@@ -20,10 +20,13 @@ export type Step<T extends StepId = StepId> = {
     | Record<StepStatus, string>
     | ((state: StepsState) => Record<StepStatus, string>);
   status: (state: StepsState) => StepStatus;
-  render?: (state: StepsState, callbacks: StepCallbacks<T>) => JSX.Element; // TODO remove optional when implemented
+  render?: (
+    state: StepsState,
+    callbacks: StepCallbacks<T>
+  ) => JSX.Element | null; // TODO remove optional when implemented
   nextSteps?: {
-    completed?: StepId[];
-    failed?: StepId[];
+    completed?: StepId;
+    failed?: StepId;
   };
 };
 
@@ -51,3 +54,7 @@ export type StepState<T extends StepId> = StepDataMap[T];
 export type StepsState = {
   [K in StepId]?: StepState<K>;
 };
+
+export type StepComponentProps<T extends StepId> = {
+  id: T;
+} & StepCallbacks<T>;

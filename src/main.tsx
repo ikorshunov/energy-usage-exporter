@@ -13,9 +13,7 @@ const App = () => {
   const [currentStepId, setCurrentStepId] =
     React.useState<StepId>("auth-token");
   const [completedSteps, setCompletedSteps] = React.useState<StepId[]>([]);
-  const [stepsState, setStepsState] = React.useState<StepsState>({
-    "auth-token": { authToken: undefined },
-  });
+  const [stepsState, setStepsState] = React.useState<StepsState>({});
 
   const { status: currentStepStatus, description: currentStepDescription } =
     getStepDescriptionProps(config[currentStepId], stepsState);
@@ -25,9 +23,9 @@ const App = () => {
       setStepsState((prev) => ({ ...prev, [currentStepId]: data }));
       setCompletedSteps((prev) => [...prev, currentStepId]);
 
-      const nextSteps = config[currentStepId].nextSteps?.completed;
-      if (nextSteps) {
-        setCurrentStepId(nextSteps[0]);
+      const nextStepId = config[currentStepId].nextSteps?.completed;
+      if (nextStepId) {
+        setCurrentStepId(nextStepId);
       } else {
         exit();
       }
@@ -36,9 +34,17 @@ const App = () => {
   );
 
   const onStepFail = useCallback(() => {
-    const nextSteps = config[currentStepId].nextSteps?.failed;
-    if (nextSteps) {
-      setCurrentStepId(nextSteps[0]);
+    const nextStepId = config[currentStepId].nextSteps?.failed;
+    if (nextStepId) {
+      const completedNextStepIndex = completedSteps.findIndex(
+        (completedStepId) => completedStepId === nextStepId
+      );
+
+      if (completedNextStepIndex !== -1) {
+        setCompletedSteps((prev) => prev.slice(completedNextStepIndex));
+      }
+
+      setCurrentStepId(nextStepId);
     } else {
       exit();
     }

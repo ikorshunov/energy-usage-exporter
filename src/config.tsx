@@ -1,22 +1,31 @@
 import React from "react";
 import { StepsConfig } from "./types.js";
 import { AuthTokenStep } from "./components/AuthTokenStep.js";
+import { DataAccessTokenStep } from "./components/DataAccessTokenStep.js";
 
 export const config: StepsConfig = {
   "auth-token": {
     id: "auth-token",
-    description: (state) => ({
-      pending:
-        state["auth-token"]?.authToken === undefined
-          ? "Looking for auth token..."
-          : "Provide auth token:",
-      completed: "Auth token",
-      failed: "Missing auth token",
-    }),
-    render: (_state, callbacks) => {
+    description: (state) => {
+      const authToken = state["auth-token"]?.authToken;
+
+      return {
+        pending:
+          authToken === undefined
+            ? "Looking for auth token..."
+            : "Provide auth token:",
+        completed: "Auth token",
+        failed:
+          authToken === null ? "Missing auth token" : "Update auth token:",
+      };
+    },
+    render: (state, callbacks) => {
+      const dataAccessToken = state["data-access-token"]?.dataAccessToken;
+
       return (
         <AuthTokenStep
           id="auth-token"
+          dataAccessToken={dataAccessToken}
           onDataChange={callbacks.onDataChange}
           onComplete={callbacks.onComplete}
           onFail={callbacks.onFail}
@@ -24,12 +33,17 @@ export const config: StepsConfig = {
       );
     },
     status: (state) => {
-      const { authToken } = state["auth-token"] || {};
+      const authToken = state["auth-token"]?.authToken;
+      const dataAccessToken = state["data-access-token"]?.dataAccessToken;
 
-      return authToken ? "completed" : "pending";
+      if (dataAccessToken === undefined) {
+        return authToken ? "completed" : "pending";
+      } else {
+        return "failed";
+      }
     },
     nextSteps: {
-      completed: ["data-access-token"],
+      completed: "data-access-token",
     },
   },
   "data-access-token": {
@@ -39,6 +53,22 @@ export const config: StepsConfig = {
       completed: "Data access token received",
       failed: "Failed to get data access token",
     },
+    render: (state, callbacks) => {
+      const authToken = state["auth-token"]?.authToken;
+      if (!authToken) {
+        return null;
+      }
+
+      return (
+        <DataAccessTokenStep
+          id="data-access-token"
+          authToken={authToken}
+          onDataChange={callbacks.onDataChange}
+          onComplete={callbacks.onComplete}
+          onFail={callbacks.onFail}
+        />
+      );
+    },
     status: (state) => {
       const { dataAccessToken } = state["data-access-token"] || {};
       if (!dataAccessToken) {
@@ -47,8 +77,8 @@ export const config: StepsConfig = {
       return "completed";
     },
     nextSteps: {
-      completed: ["customer-id-type"],
-      failed: ["auth-token"],
+      completed: "customer-id-type",
+      failed: "auth-token",
     },
   },
   "customer-id-type": {
@@ -64,7 +94,7 @@ export const config: StepsConfig = {
       return customerIdType ? "completed" : "pending";
     },
     nextSteps: {
-      completed: ["customer-id-value"],
+      completed: "customer-id-value",
     },
   },
   "customer-id-value": {
