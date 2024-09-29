@@ -1,11 +1,16 @@
-import { TaskAgent, TaskAgentConfig } from "./types.js";
+import {
+  Operations,
+  UnknownOperationsData,
+  TaskAgent,
+  TaskAgentConfig,
+} from "./types.js";
 
 export function createTaskAgent<
-  OperationsData extends Record<string, unknown>,
+  OperationsData extends UnknownOperationsData,
   OperationId extends Extract<keyof OperationsData, string>
 >(
   initialData: OperationsData,
-  config: TaskAgentConfig<OperationId, OperationsData>
+  config: TaskAgentConfig<OperationsData>
 ): TaskAgent<OperationId, OperationsData> {
   const stepIds = Object.keys(config) as OperationId[];
   const initialOperationIds = stepIds.filter((key) => config[key].isInitial);
@@ -24,6 +29,27 @@ export function createTaskAgent<
     config,
     currentOperationId: initialOperationId,
     prevOperationIds: [],
-    data: initialData,
+    operations: stepIds.reduce((operations, operationId) => {
+      const operationConfig = config[operationId];
+      let label: string;
+
+      if ("label" in operationConfig) {
+        label = operationConfig.label;
+      } else {
+        label = operationConfig.getLabel(initialData[operationId], initialData);
+      }
+
+      operations[operationId] = {
+        id: operationId,
+        label,
+        status: operationConfig.getStatus(
+          initialData[operationId],
+          initialData
+        ),
+        data: initialData[operationId],
+      };
+
+      return operations;
+    }, {} as Operations<OperationId, OperationsData>),
   };
 }
