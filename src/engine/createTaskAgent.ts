@@ -31,22 +31,21 @@ export function createTaskAgent<
     prevOperationIds: [],
     operations: stepIds.reduce((operations, operationId) => {
       const operationConfig = config[operationId];
-      let label: string;
-
-      if ("label" in operationConfig) {
-        label = operationConfig.label;
-      } else {
-        label = operationConfig.getLabel(initialData[operationId], initialData);
-      }
 
       operations[operationId] = {
         id: operationId,
-        label,
-        status: operationConfig.getStatus(
-          initialData[operationId],
-          initialData
-        ),
         data: initialData[operationId],
+        get label() {
+          return "label" in operationConfig
+            ? operationConfig.label
+            : operationConfig.getLabel(initialData[operationId], initialData);
+        },
+        get status() {
+          return operationConfig.getStatus(
+            initialData[operationId],
+            initialData
+          );
+        },
       };
 
       return operations;
