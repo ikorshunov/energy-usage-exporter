@@ -83,7 +83,7 @@ export type TaskApi<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  getOperation: <ExactOperationId extends OperationId>(
+  getOperationStatus: <ExactOperationId extends OperationId>(
     operationId: ExactOperationId
-  ) => Omit<Operation<ExactOperationId, OperationsData>, "data">;
+  ) => OperationStatus;
 };

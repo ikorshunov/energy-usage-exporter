@@ -20,10 +20,9 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   "auth-token": {
     id: "auth-token",
     isInitial: true,
-    getStatus: (data, task) => {
-      const { authToken } = data;
-      const { status: dataAccessTokenStatus } =
-        task.getOperation("data-access-token");
+    getStatus: ({ authToken }, task) => {
+      const dataAccessTokenStatus =
+        task.getOperationStatus("data-access-token");
 
       if (!authToken) {
         return "pending";
@@ -33,10 +32,9 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
 
       return "success";
     },
-    getLabel: (data, task) => {
-      const { authToken } = data;
-      const { status: dataAccessTokenStatus } =
-        task.getOperation("data-access-token");
+    getLabel: ({ authToken }, task) => {
+      const dataAccessTokenStatus =
+        task.getOperationStatus("data-access-token");
 
       if (authToken === undefined) {
         return "Looking for auth token...";

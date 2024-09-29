@@ -17,13 +17,11 @@ export function createTaskApi<
   const task = createTask(config);
 
   const taskApi: TaskApi<OperationId, OperationsData> = {
-    getOperation: <ExactOperationId extends OperationId>(
-      operationId: ExactOperationId
-    ) => {
+    getOperationStatus: (operationId: OperationId) => {
       if (!task.operations) {
         throw new Error("Operations have not been initialized.");
       }
-      return task.operations[operationId];
+      return task.operations[operationId].status;
     },
   };
 
