@@ -33,7 +33,7 @@ type OperationLabelConfig<
       getLabel: GetOperationLabel<OperationId, OperationsData>;
     };
 
-type OperationConfig<
+export type OperationConfig<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
@@ -42,7 +42,7 @@ type OperationConfig<
   getStatus: GetOperationStatus<OperationId, OperationsData>;
 } & OperationLabelConfig<OperationId, OperationsData>;
 
-type Operation<
+export type Operation<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
