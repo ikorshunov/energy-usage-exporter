@@ -1,10 +1,10 @@
 import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
 import React from "react";
-import { StepStatus } from "../types.js";
+import { OperationStatus } from "../engine/types.js";
 
 type StepProps = {
-  status: StepStatus;
+  status: OperationStatus;
   description: string;
 };
 
@@ -13,14 +13,8 @@ export const StepDescription = (props: StepProps) => {
 
   return (
     <Box gap={1}>
-      <Text color={status === "failed" ? "red" : "green"}>
-        {status === "pending" ? (
-          <Spinner />
-        ) : status === "completed" ? (
-          "✔"
-        ) : (
-          "x"
-        )}
+      <Text color={status === "error" ? "red" : "green"}>
+        {status === "pending" ? <Spinner /> : status === "success" ? "✔" : "x"}
       </Text>
       <Text>{description}</Text>
     </Box>

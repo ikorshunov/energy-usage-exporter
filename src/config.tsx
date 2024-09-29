@@ -1,113 +1,95 @@
-import React from "react";
-import { StepsConfig } from "./types.js";
-import { AuthTokenStep } from "./components/AuthTokenStep.js";
-import { DataAccessTokenStep } from "./components/DataAccessTokenStep.js";
+import { TaskConfig } from "./engine/types.js";
+import { TaskOperationsData } from "./types.js";
 
-export const config: StepsConfig = {
+export const taskOperationsData: TaskOperationsData = {
+  "auth-token": {
+    authToken: undefined,
+  },
+  "data-access-token": {
+    dataAccessToken: undefined,
+  },
+  "customer-id-type": {
+    customerIdType: "customerKey",
+  },
+  "customer-id-value": {
+    customerIdValue: null,
+  },
+};
+
+export const taskConfig: TaskConfig<TaskOperationsData> = {
   "auth-token": {
     id: "auth-token",
-    description: (state) => {
-      const authToken = state["auth-token"]?.authToken;
+    isInitial: true,
+    getStatus: (data, task) => {
+      const { authToken } = data;
+      const { status: dataAccessTokenStatus } =
+        task.getOperation("data-access-token");
 
-      return {
-        pending:
-          authToken === undefined
-            ? "Looking for auth token..."
-            : "Provide auth token:",
-        completed: "Auth token",
-        failed:
-          authToken === null ? "Missing auth token" : "Update auth token:",
-      };
-    },
-    render: (state, callbacks) => {
-      const dataAccessToken = state["data-access-token"]?.dataAccessToken;
-
-      return (
-        <AuthTokenStep
-          id="auth-token"
-          dataAccessToken={dataAccessToken}
-          onDataChange={callbacks.onDataChange}
-          onComplete={callbacks.onComplete}
-          onFail={callbacks.onFail}
-        />
-      );
-    },
-    status: (state) => {
-      const authToken = state["auth-token"]?.authToken;
-      const dataAccessToken = state["data-access-token"]?.dataAccessToken;
-
-      if (dataAccessToken === undefined) {
-        return authToken ? "completed" : "pending";
-      } else {
-        return "failed";
+      if (!authToken) {
+        return "pending";
+      } else if (dataAccessTokenStatus === "error") {
+        return "error";
       }
+
+      return "success";
     },
-    nextSteps: {
-      completed: "data-access-token",
+    getLabel: (data, task) => {
+      const { authToken } = data;
+      const { status: dataAccessTokenStatus } =
+        task.getOperation("data-access-token");
+
+      if (authToken === undefined) {
+        return "Looking for auth token...";
+      }
+      if (authToken === null) {
+        return "Auth token not found, provide auth token:";
+      }
+      if (dataAccessTokenStatus === "error") {
+        return "Update auth token:";
+      }
+
+      return "Auth token";
     },
   },
   "data-access-token": {
     id: "data-access-token",
-    description: {
-      pending: "Requesting data access token...",
-      completed: "Data access token received",
-      failed: "Failed to get data access token",
-    },
-    render: (state, callbacks) => {
-      const authToken = state["auth-token"]?.authToken;
-      if (!authToken) {
-        return null;
+    getStatus: ({ dataAccessToken }) => {
+      if (dataAccessToken === undefined) {
+        return "pending";
+      }
+      if (dataAccessToken === null) {
+        return "error";
       }
 
-      return (
-        <DataAccessTokenStep
-          id="data-access-token"
-          authToken={authToken}
-          onDataChange={callbacks.onDataChange}
-          onComplete={callbacks.onComplete}
-          onFail={callbacks.onFail}
-        />
-      );
+      return "success";
     },
-    status: (state) => {
-      const { dataAccessToken } = state["data-access-token"] || {};
-      if (!dataAccessToken) {
-        return dataAccessToken === null ? "failed" : "pending";
+    getLabel: ({ dataAccessToken }) => {
+      if (dataAccessToken === undefined) {
+        return "Requesting data access token...";
       }
-      return "completed";
-    },
-    nextSteps: {
-      completed: "customer-id-type",
-      failed: "auth-token",
+      if (dataAccessToken === null) {
+        return "Failed to get data access token";
+      }
+
+      return "Data access token";
     },
   },
   "customer-id-type": {
     id: "customer-id-type",
-    description: (state) => ({
-      pending: "Choose customer ID type:",
-      completed: `Customer ID type selected: ${state["customer-id-type"]?.customerIdType}`,
-      failed: "Customer ID type required",
-    }),
-    status: (state) => {
-      const { customerIdType } = state["customer-id-type"] || {};
-
-      return customerIdType ? "completed" : "pending";
+    getStatus: (data) => {
+      return "pending";
     },
-    nextSteps: {
-      completed: "customer-id-value",
+    getLabel: (data) => {
+      return "";
     },
   },
   "customer-id-value": {
     id: "customer-id-value",
-    description: (state) => ({
-      pending: "Enter customer ID:",
-      completed: `Customer ID: ${state["customer-id-value"]?.customerIdValue}`,
-      failed: "Customer ID value required",
-    }),
-    status: (state) => {
-      const { customerIdValue } = state["customer-id-value"] || {};
-
-      return customerIdValue ? "completed" : "pending";
+    getStatus: (data) => {
+      return "pending";
+    },
+    getLabel: (data) => {
+      return "";
     },
   },
 };

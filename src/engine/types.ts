@@ -1,4 +1,4 @@
-type OperationStatus = "pending" | "success" | "error";
+export type OperationStatus = "pending" | "success" | "error";
 
 export type UnknownOperationsData = Record<string, Record<string, unknown>>;
 
@@ -6,14 +6,20 @@ type GetOperationLabel<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  (data: OperationsData[OperationId], context: OperationsData): string;
+  (
+    data: OperationsData[OperationId],
+    task: TaskApi<Extract<keyof OperationsData, string>, OperationsData>
+  ): string;
 };
 
 type GetOperationStatus<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  (data: OperationsData[OperationId], context: OperationsData): OperationStatus;
+  (
+    data: OperationsData[OperationId],
+    task: TaskApi<Extract<keyof OperationsData, string>, OperationsData>
+  ): OperationStatus;
 };
 
 type OperationLabelConfig<
@@ -53,7 +59,7 @@ export type Operations<
   [Key in OperationId]: Operation<Key, OperationsData>;
 };
 
-export type TaskAgentConfig<
+export type TaskConfig<
   OperationsData extends UnknownOperationsData,
   OperationId extends Extract<keyof OperationsData, string> = Extract<
     keyof OperationsData,
@@ -63,12 +69,21 @@ export type TaskAgentConfig<
   [Key in OperationId]: OperationConfig<Key, OperationsData>;
 };
 
-export type TaskAgent<
+export type Task<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  readonly config: TaskAgentConfig<OperationsData>;
+  readonly config: TaskConfig<OperationsData>;
   currentOperationId: OperationId;
   prevOperationIds: OperationId[];
-  operations: Operations<OperationId, OperationsData>;
+  operations: Operations<OperationId, OperationsData> | null;
+};
+
+export type TaskApi<
+  OperationId extends string,
+  OperationsData extends UnknownOperationsData
+> = {
+  getOperation: <ExactOperationId extends OperationId>(
+    operationId: ExactOperationId
+  ) => Omit<Operation<ExactOperationId, OperationsData>, "data">;
 };
