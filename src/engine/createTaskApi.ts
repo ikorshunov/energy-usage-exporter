@@ -30,7 +30,6 @@ export function createTaskApi<
     const operationConfig = config[operationId];
 
     operations[operationId] = createOperation(
-      taskApi,
       operationConfig,
       initialData[operationId]
     );
