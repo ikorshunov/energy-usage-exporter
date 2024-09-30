@@ -2,10 +2,8 @@ import { TaskConfig } from "./engine/types.js";
 import { TaskOperationsData } from "./types.js";
 
 export const taskOperationsData: TaskOperationsData = {
-  "auth-token": {
-    authToken: undefined,
-  },
   "data-access-token": {
+    authToken: undefined,
     dataAccessToken: undefined,
   },
   "customer-id-type": {
@@ -17,21 +15,9 @@ export const taskOperationsData: TaskOperationsData = {
 };
 
 export const taskConfig: TaskConfig<TaskOperationsData> = {
-  "auth-token": {
-    id: "auth-token",
-    isInitial: true,
-    getStatus: ({ authToken }) => {
-      if (authToken === undefined) {
-        return "pending";
-      } else if (authToken === null) {
-        return "error";
-      }
-
-      return "success";
-    },
-  },
   "data-access-token": {
     id: "data-access-token",
+    isInitial: true,
     getStatus: ({ dataAccessToken }) => {
       if (dataAccessToken === undefined) {
         return "pending";
@@ -42,17 +28,26 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
 
       return "success";
     },
+    implementation: () => {
+      console.log("Implementing data-access-token operation");
+    },
   },
   "customer-id-type": {
     id: "customer-id-type",
     getStatus: (data) => {
       return "pending";
     },
+    implementation: () => {
+      console.log("Implementing customer-id-type operation");
+    },
   },
   "customer-id-value": {
     id: "customer-id-value",
     getStatus: (data) => {
       return "pending";
+    },
+    implementation: () => {
+      console.log("Implementing customer-id-value operation");
     },
   },
 };

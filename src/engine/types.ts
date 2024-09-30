@@ -16,6 +16,7 @@ export type OperationConfig<
   id: OperationId;
   isInitial?: boolean;
   getStatus: GetOperationStatus<OperationId, OperationsData>;
+  implementation: VoidFunction;
 };
 
 export type Operation<
@@ -24,6 +25,7 @@ export type Operation<
 > = {
   readonly id: OperationId;
   readonly status: OperationStatus;
+  readonly run: VoidFunction;
   data: OperationsData[OperationId];
 };
 
@@ -44,11 +46,10 @@ export type TaskConfig<
   [Key in OperationId]: OperationConfig<Key, OperationsData>;
 };
 
-export type Task<
+export type TaskState<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  readonly config: TaskConfig<OperationsData>;
   currentOperationId: OperationId;
   prevOperationIds: OperationId[];
   operations: Operations<OperationId, OperationsData> | null;
@@ -58,7 +59,13 @@ export type TaskApi<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  getOperationStatus: <ExactOperationId extends OperationId>(
-    operationId: ExactOperationId
-  ) => OperationStatus;
+  run: () => void;
+  runOperation: (operationId: OperationId) => void;
+  getOperationData: <Id extends OperationId>(
+    operationId: Id
+  ) => OperationsData[Id];
+  setOperationData: <Id extends OperationId>(
+    operationId: Id,
+    data: OperationsData[Id]
+  ) => void;
 };

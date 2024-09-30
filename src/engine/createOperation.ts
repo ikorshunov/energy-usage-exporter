@@ -10,11 +10,13 @@ export function createOperation<
   OperationsData extends UnknownOperationsData
 >(
   config: OperationConfig<OperationId, OperationsData>,
-  data: OperationsData[OperationId]
+  data: OperationsData[OperationId],
+  taskApi: TaskApi<OperationId, OperationsData>
 ): Operation<OperationId, OperationsData> {
   return {
     id: config.id,
     data,
+    run: () => config.implementation(),
     get status() {
       return config.getStatus(this.data);
     },
