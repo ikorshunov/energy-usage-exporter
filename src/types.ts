@@ -1,6 +1,8 @@
 export type TaskOperationsData = {
-  "data-access-token": {
+  "auth-token": {
     authToken: string | null | undefined;
+  };
+  "data-access-token": {
     dataAccessToken: string | null | undefined;
   };
   "customer-id-type": {

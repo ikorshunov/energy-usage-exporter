@@ -11,10 +11,7 @@ import {
 export function createTask<
   OperationsData extends UnknownOperationsData,
   OperationId extends Extract<keyof OperationsData, string>
->(
-  initialData: OperationsData,
-  config: TaskConfig<OperationsData>
-): TaskApi<OperationId, OperationsData> {
+>(initialData: OperationsData, config: TaskConfig<OperationsData>): () => void {
   const taskState: TaskState<OperationId, OperationsData> = {
     currentOperationId: getInitialOperationId(config),
     prevOperationIds: [],
@@ -29,13 +26,16 @@ export function createTask<
       if (!taskState.operations) {
         throw new Error("Operations have not been initialized.");
       }
-      const prevOperationsId = taskState.currentOperationId;
-      taskState.currentOperationId = operationId;
 
-      if (operationId !== prevOperationsId) {
-        taskState.prevOperationIds.push(prevOperationsId);
+      const samePrevOperationIdIndex =
+        taskState.prevOperationIds.indexOf(operationId);
+      if (samePrevOperationIdIndex !== -1) {
+        taskState.prevOperationIds = taskState.prevOperationIds.slice(
+          0,
+          samePrevOperationIdIndex
+        );
       }
-
+      taskState.currentOperationId = operationId;
       taskState.operations[operationId].run();
     },
     getOperationData: (operationId) => {
@@ -68,5 +68,5 @@ export function createTask<
     return operations;
   }, {} as Operations<Extract<keyof OperationsData, string>, OperationsData>);
 
-  return taskApi;
+  return taskApi.run;
 }

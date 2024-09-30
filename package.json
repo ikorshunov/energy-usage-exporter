@@ -13,16 +13,11 @@
   "author": "Ilia Korshunov",
   "license": "MIT",
   "dependencies": {
-    "ink": "^5.0.1",
-    "ink-select-input": "^6.0.0",
-    "ink-spinner": "^5.0.0",
-    "ink-text-input": "^6.0.0",
-    "react": "^18.3.1"
+    "@inquirer/core": "^9.2.1",
+    "@inquirer/prompts": "^6.0.1"
   },
   "type": "module",
   "devDependencies": {
-    "@types/ink": "^2.0.3",
-    "@types/node": "^22.7.3",
-    "@types/react": "^18.3.9"
+    "@types/node": "^22.7.3"
   }
 }

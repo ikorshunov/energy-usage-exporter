@@ -1,4 +1,3 @@
-import { token } from "../tokens/useDataAccessToken.js";
 import { sleep } from "../utils.js";
 
 const API_URL = "https://api.eloverblik.dk/thirdpartyapi/api";
@@ -16,7 +15,7 @@ export const makeApiRequest = <T extends Record<string, unknown>>(
     fetch(url, {
       method,
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${process.env.ENUEX_DATA_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
         ...headers,
       },

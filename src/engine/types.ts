@@ -2,11 +2,20 @@ export type OperationStatus = "pending" | "success" | "error";
 
 export type UnknownOperationsData = Record<string, Record<string, unknown>>;
 
-type GetOperationStatus<
+export type OperationImplementationParams<
   OperationId extends string,
   OperationsData extends UnknownOperationsData
 > = {
-  (data: OperationsData[OperationId]): OperationStatus;
+  getData: {
+    <Id extends keyof OperationsData>(operationId: Id): OperationsData[Id];
+    (): OperationsData[OperationId];
+  };
+  done: (
+    data:
+      | OperationsData[OperationId]
+      | ((prevData: OperationsData[OperationId]) => OperationsData[OperationId])
+  ) => void;
+  retry: (operationId?: OperationId) => void;
 };
 
 export type OperationConfig<
@@ -15,8 +24,10 @@ export type OperationConfig<
 > = {
   id: OperationId;
   isInitial?: boolean;
-  getStatus: GetOperationStatus<OperationId, OperationsData>;
-  implementation: VoidFunction;
+  nextOperationId?: Exclude<keyof OperationsData, OperationId>;
+  implementation: (
+    params: OperationImplementationParams<OperationId, OperationsData>
+  ) => void;
 };
 
 export type Operation<
@@ -24,7 +35,6 @@ export type Operation<
   OperationsData extends UnknownOperationsData
 > = {
   readonly id: OperationId;
-  readonly status: OperationStatus;
   readonly run: VoidFunction;
   data: OperationsData[OperationId];
 };
