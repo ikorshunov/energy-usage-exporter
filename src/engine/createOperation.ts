@@ -36,7 +36,7 @@ export function createOperation<
         taskApi.runOperation(config.nextOperationId as unknown as OperationId);
       }
     },
-    retry: (operationId) => {
+    retry: (operationId?: OperationId) => {
       taskApi.runOperation(operationId || config.id);
     },
   };

@@ -1,5 +1,7 @@
 import { TaskConfig } from "./engine/types.js";
 import { TaskOperationsData } from "./types.js";
+import { authToken } from "./implementations/authToken.js";
+import { dataAccessToken } from "./implementations/dataAccessToken.js";
 
 export const taskOperationsData: TaskOperationsData = {
   "auth-token": {
@@ -12,7 +14,7 @@ export const taskOperationsData: TaskOperationsData = {
     customerIdType: "customerKey",
   },
   "customer-id-value": {
-    customerIdValue: null,
+    customerIdValue: undefined,
   },
 };
 
@@ -21,18 +23,12 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
     id: "auth-token",
     isInitial: true,
     nextOperationId: "data-access-token",
-    implementation: ({ done }) => {
-      console.log("Implementing auth-token operation");
-      done({ authToken: "authToken" });
-    },
+    implementation: authToken,
   },
   "data-access-token": {
     id: "data-access-token",
     nextOperationId: "customer-id-type",
-    implementation: ({ done }) => {
-      console.log("Implementing data-access-token operation");
-      done({ dataAccessToken: "dataAccessToken" });
-    },
+    implementation: dataAccessToken,
   },
   "customer-id-type": {
     id: "customer-id-type",

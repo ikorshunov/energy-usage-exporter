@@ -15,7 +15,10 @@ export type OperationImplementationParams<
       | OperationsData[OperationId]
       | ((prevData: OperationsData[OperationId]) => OperationsData[OperationId])
   ) => void;
-  retry: (operationId?: OperationId) => void;
+  retry: {
+    <Id extends keyof OperationsData>(operationId: Id): void;
+    (): void;
+  };
 };
 
 export type OperationConfig<
