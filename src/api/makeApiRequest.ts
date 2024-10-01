@@ -3,12 +3,15 @@ import { sleep } from "../utils.js";
 const API_URL = "https://api.eloverblik.dk/thirdpartyapi/api";
 const UI_DELAY = 1000;
 
-export const makeApiRequest = <T extends Record<string, unknown>>(
+export const makeApiRequest = <
+  Result,
+  T extends Record<string, unknown> = Record<string, unknown>
+>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: T,
   headers?: RequestInit["headers"]
-) => {
+): Promise<Result> => {
   const url = encodeURI(`${API_URL}${endpoint}`);
 
   return sleep(UI_DELAY).then(() =>

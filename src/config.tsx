@@ -4,6 +4,7 @@ import { authToken } from "./implementations/authToken.js";
 import { dataAccessToken } from "./implementations/dataAccessToken.js";
 import { customerIdType } from "./implementations/customerIdType.js";
 import { customerIdValue } from "./implementations/customerIdValue.js";
+import { meteringPointList } from "./implementations/meteringPointList.js";
 
 export const taskOperationsData: TaskOperationsData = {
   "auth-token": {
@@ -17,6 +18,9 @@ export const taskOperationsData: TaskOperationsData = {
   },
   "customer-id-value": {
     customerIdValue: undefined,
+  },
+  "metering-point-list": {
+    meteringPointList: [],
   },
 };
 
@@ -39,6 +43,11 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   },
   "customer-id-value": {
     id: "customer-id-value",
+    nextOperationId: "metering-point-list",
     implementation: customerIdValue,
+  },
+  "metering-point-list": {
+    id: "metering-point-list",
+    implementation: meteringPointList,
   },
 };
