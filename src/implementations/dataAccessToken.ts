@@ -7,7 +7,6 @@ export const dataAccessToken = ({
   getData,
   retry,
 }: OperationImplementationParams<"data-access-token", TaskOperationsData>) => {
-  console.log("Implementing data-access-token operation");
   const { authToken = "" } = getData("auth-token");
   getDataAccessToken(authToken)
     .then((dataAccessToken) => {

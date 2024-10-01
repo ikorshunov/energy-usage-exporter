@@ -1,3 +1,4 @@
+export type CustomerIdType = "authorizationId" | "customerCVR" | "customerKey";
 export type TaskOperationsData = {
   "auth-token": {
     authToken?: string;
@@ -6,7 +7,7 @@ export type TaskOperationsData = {
     dataAccessToken?: string;
   };
   "customer-id-type": {
-    customerIdType: "authorizationId" | "customerCVR" | "customerKey";
+    customerIdType: CustomerIdType;
   };
   "customer-id-value": {
     customerIdValue?: string;

@@ -7,7 +7,6 @@ export const authToken = ({
   done,
   getData,
 }: OperationImplementationParams<"auth-token", TaskOperationsData>) => {
-  console.log("Implementing auth-token operation");
   const tokenFileName = `${import.meta.dirname}/auth_token.txt`;
   readFile(tokenFileName, "utf8", (err, data) => {
     const { authToken } = getData();
