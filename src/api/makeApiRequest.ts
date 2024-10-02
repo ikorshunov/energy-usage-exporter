@@ -1,4 +1,4 @@
-import { sleep } from "../utils.js";
+import { getCache, sleep, writeCache } from "../utils.js";
 
 const API_URL = "https://api.eloverblik.dk/thirdpartyapi/api";
 const UI_DELAY = 1000;
@@ -13,26 +13,43 @@ export const makeApiRequest = <
   headers?: RequestInit["headers"]
 ): Promise<Result> => {
   const url = encodeURI(`${API_URL}${endpoint}`);
+  return getCache().then((cache) => {
+    const cacheKey = `${method}:${url}`;
+    const cacheEntry = cache[cacheKey];
+    if (cacheEntry && cacheEntry.expires > Date.now()) {
+      return cacheEntry.data as Result;
+    }
 
-  return sleep(UI_DELAY).then(() =>
-    fetch(url, {
-      method,
-      headers: {
-        Authorization: `Bearer ${process.env.ENUEX_DATA_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    }).then((response) => {
-      if (response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          return response.json().then(({ result }) => result);
-        }
-        return response.text();
-      }
+    return sleep(UI_DELAY).then(() =>
+      fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${process.env.ENUEX_DATA_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+          ...headers,
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      })
+        .then((response) => {
+          if (response.ok) {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              return response.json().then(({ result }) => result);
+            }
+            return response.text();
+          }
 
-      return Promise.reject(response);
-    })
-  );
+          return Promise.reject(response);
+        })
+        .then((data) => {
+          cache[cacheKey] = {
+            data,
+            expires: Date.now() + 1000 * 60 * 60 * 24, // 24 hours
+          };
+          writeCache(cache);
+
+          return data;
+        })
+    );
+  });
 };

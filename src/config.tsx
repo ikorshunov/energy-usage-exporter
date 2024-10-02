@@ -6,6 +6,9 @@ import { customerIdType } from "./implementations/customerIdType.js";
 import { customerIdValue } from "./implementations/customerIdValue.js";
 import { meteringPoints } from "./implementations/meteringPoints.js";
 import { selectedMeteringPoints } from "./implementations/selectedMeteringPoints.js";
+import path from "path";
+
+export const cacheFilePath = path.resolve(`${import.meta.url}/cache`);
 
 export const getInitialAggregatedMeteringPointsData: () => AggregatedMeteringPointsData =
   () => ({

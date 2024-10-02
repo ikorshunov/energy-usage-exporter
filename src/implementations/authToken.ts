@@ -1,30 +1,30 @@
-import { readFile, writeFile } from "fs";
 import { OperationImplementationParams } from "../engine/types.js";
 import { TaskOperationsData } from "../types.js";
 import { password } from "@inquirer/prompts";
+import { getCache, writeCache } from "../utils.js";
 
 export const authToken = ({
   done,
   getData,
 }: OperationImplementationParams<"auth-token", TaskOperationsData>) => {
-  const tokenFileName = `${import.meta.dirname}/auth_token.txt`;
-  readFile(tokenFileName, "utf8", (err, data) => {
+  getCache().then((cache) => {
+    const cachedAuthToken = cache["auth-token"]?.data as string;
     const { authToken } = getData();
-    if (err || authToken) {
+    if (!cachedAuthToken || authToken) {
       password({
         message: !authToken
           ? "Enter your auth token:"
           : "Invalid auth token. Update your auth token:",
       }).then((authToken) => {
         done({ authToken });
-        writeFile(tokenFileName, authToken, (err) => {
-          if (err) {
-            console.error("Failed to save auth token to file.");
-          }
-        });
+        cache["auth-token"] = {
+          data: authToken,
+          expires: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
+        };
+        writeCache(cache);
       });
     } else {
-      done({ authToken: data });
+      done({ authToken: cachedAuthToken });
     }
   });
 };

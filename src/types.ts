@@ -37,3 +37,11 @@ export type TaskOperationsData = {
     meteringPointIds: string[];
   };
 };
+
+export type Cache = Record<
+  string,
+  {
+    data: unknown;
+    expires: number;
+  }
+>;
