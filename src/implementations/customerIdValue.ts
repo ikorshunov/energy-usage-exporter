@@ -13,6 +13,7 @@ export const customerIdValue = ({
     }
     done({ customerIdValue: customerIdValue.toString() });
   };
+  const { customerIdValue } = getData();
 
   if (
     customerIdType === "authorizationId" ||
@@ -25,11 +26,13 @@ export const customerIdValue = ({
           : "customer CVR"
       }:`,
       required: true,
+      default: Number(customerIdValue),
     }).then(onEntered);
   } else {
     input({
       message: "Enter customer key:",
       required: true,
+      default: customerIdValue,
     }).then(onEntered);
   }
 };

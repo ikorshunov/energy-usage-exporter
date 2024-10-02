@@ -8,6 +8,15 @@ export type MeteringPoint = {
   postcode: string;
   cityName: string;
 };
+export type AggregatedMeteringPointsData = {
+  totalStreets: number;
+  totalBuildings: number;
+  data: {
+    [key: string]: {
+      [key: string]: MeteringPoint[];
+    };
+  };
+};
 export type TaskOperationsData = {
   "auth-token": {
     authToken?: string;
@@ -21,7 +30,10 @@ export type TaskOperationsData = {
   "customer-id-value": {
     customerIdValue?: string;
   };
-  "metering-point-list": {
-    meteringPointList: MeteringPoint[];
+  "metering-points": {
+    meteringPoints: AggregatedMeteringPointsData;
+  };
+  "selected-metering-points": {
+    meteringPointIds: string[];
   };
 };

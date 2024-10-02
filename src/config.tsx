@@ -1,10 +1,18 @@
 import { TaskConfig } from "./engine/types.js";
-import { TaskOperationsData } from "./types.js";
+import { AggregatedMeteringPointsData, TaskOperationsData } from "./types.js";
 import { authToken } from "./implementations/authToken.js";
 import { dataAccessToken } from "./implementations/dataAccessToken.js";
 import { customerIdType } from "./implementations/customerIdType.js";
 import { customerIdValue } from "./implementations/customerIdValue.js";
-import { meteringPointList } from "./implementations/meteringPointList.js";
+import { meteringPoints } from "./implementations/meteringPoints.js";
+import { selectedMeteringPoints } from "./implementations/selectedMeteringPoints.js";
+
+export const getInitialAggregatedMeteringPointsData: () => AggregatedMeteringPointsData =
+  () => ({
+    totalStreets: 0,
+    totalBuildings: 0,
+    data: {},
+  });
 
 export const taskOperationsData: TaskOperationsData = {
   "auth-token": {
@@ -19,8 +27,11 @@ export const taskOperationsData: TaskOperationsData = {
   "customer-id-value": {
     customerIdValue: undefined,
   },
-  "metering-point-list": {
-    meteringPointList: [],
+  "metering-points": {
+    meteringPoints: getInitialAggregatedMeteringPointsData(),
+  },
+  "selected-metering-points": {
+    meteringPointIds: [],
   },
 };
 
@@ -43,11 +54,16 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   },
   "customer-id-value": {
     id: "customer-id-value",
-    nextOperationId: "metering-point-list",
+    nextOperationId: "metering-points",
     implementation: customerIdValue,
   },
-  "metering-point-list": {
-    id: "metering-point-list",
-    implementation: meteringPointList,
+  "metering-points": {
+    id: "metering-points",
+    nextOperationId: "selected-metering-points",
+    implementation: meteringPoints,
+  },
+  "selected-metering-points": {
+    id: "selected-metering-points",
+    implementation: selectedMeteringPoints,
   },
 };

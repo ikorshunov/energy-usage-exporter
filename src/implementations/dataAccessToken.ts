@@ -1,6 +1,6 @@
 import { getDataAccessToken } from "../api/getDataAccessToken.js";
 import { OperationImplementationParams } from "../engine/types.js";
-import { apiRequest } from "../prompts/apiRequest.js";
+import { loader } from "../prompts/loader.js";
 import { TaskOperationsData } from "../types.js";
 
 export const dataAccessToken = ({
@@ -9,10 +9,10 @@ export const dataAccessToken = ({
   retry,
 }: OperationImplementationParams<"data-access-token", TaskOperationsData>) => {
   const { authToken = "" } = getData("auth-token");
-  const startRequest = () => getDataAccessToken(authToken);
+  const startLoading = () => getDataAccessToken(authToken);
 
-  apiRequest({
-    startRequest,
+  loader({
+    startLoading,
     message: (status) => {
       if (status === "pending") {
         return "Requesting data access token";

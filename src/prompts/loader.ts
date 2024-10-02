@@ -6,21 +6,21 @@ import {
   makeTheme,
 } from "@inquirer/core";
 
-type ApiRequestPromptConfig<StartRequestFunction> = {
-  startRequest: StartRequestFunction;
+type LoaderPromptConfig<StartLoadingFunction> = {
+  startLoading: StartLoadingFunction;
   message: (status: "success" | "error" | "pending") => string;
 };
 
-export const apiRequest = createPrompt<
+export const loader = createPrompt<
   unknown,
-  ApiRequestPromptConfig<() => Promise<unknown>>
->(({ startRequest, message }, done) => {
+  LoaderPromptConfig<() => Promise<unknown>>
+>(({ startLoading, message }, done) => {
   const theme = makeTheme();
   const [status, setStatus] = useState<Status>("loading");
   const [errorMessage, setErrorMessage] = useState<string>();
   const prefix = usePrefix({ status, theme });
 
-  startRequest()
+  startLoading()
     .then((result) => {
       setStatus("done");
       done(result);
