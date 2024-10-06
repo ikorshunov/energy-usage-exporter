@@ -10,18 +10,22 @@ export const makeApiRequest = <
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: T,
-  headers?: RequestInit["headers"]
+  headers?: RequestInit["headers"],
+  transform?: (data: unknown) => Result
 ): Promise<Result> => {
   const url = encodeURI(`${API_URL}${endpoint}`);
   return getCache().then((cache) => {
-    const cacheKey = `${method}:${url}`;
+    let cacheKey = `${method}:${url}`;
+    if (method === "POST" && body) {
+      cacheKey += `:${JSON.stringify(body)}`;
+    }
     const cacheEntry = cache[cacheKey];
     if (cacheEntry && cacheEntry.expires > Date.now()) {
       return cacheEntry.data as Result;
     }
 
-    return sleep(UI_DELAY).then(() =>
-      fetch(url, {
+    return sleep(UI_DELAY).then(() => {
+      return fetch(url, {
         method,
         headers: {
           Authorization: `Bearer ${process.env.ENUEX_DATA_ACCESS_TOKEN}`,
@@ -34,7 +38,13 @@ export const makeApiRequest = <
           if (response.ok) {
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
-              return response.json().then(({ result }) => result);
+              return response.json().then(({ result }) => {
+                if (transform) {
+                  const transformedResult = transform(result);
+                  return transformedResult;
+                }
+                return result;
+              });
             }
             return response.text();
           }
@@ -49,7 +59,7 @@ export const makeApiRequest = <
           writeCache(cache);
 
           return data;
-        })
-    );
+        });
+    });
   });
 };

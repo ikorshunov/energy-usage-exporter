@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import fsSync, { write } from "fs";
 import { Cache } from "./types.js";
 
-const cacheFilePath = path.resolve(import.meta.dirname, "cache");
+const cacheFilePath = path.resolve(import.meta.dirname, "cache.json");
 
 export function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));

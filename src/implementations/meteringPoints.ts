@@ -43,6 +43,7 @@ export const meteringPoints = ({
               [buildingNumber]: [meteringPoint],
             };
             acc.totalStreets++;
+            acc.totalBuildings++;
           } else if (!(buildingNumber in acc.data[streetName])) {
             acc.data[streetName][buildingNumber] = [meteringPoint];
             acc.totalBuildings++;
