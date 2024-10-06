@@ -15,12 +15,13 @@ export const writeCache = (cache: Cache) => {
 export const getCache = (): Promise<Cache> => {
   return fs
     .readFile(cacheFilePath, "utf8")
+    .catch(() => {
+      return writeCache({}).then(() => {
+        return "{}";
+      });
+    })
     .then((data) => {
       const cache = JSON.parse(data);
       return cache;
-    })
-    .catch(() => {
-      writeCache({});
-      return {};
     });
 };

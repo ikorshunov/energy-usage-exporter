@@ -16,12 +16,13 @@ export const authToken = ({
           ? "Enter your auth token:"
           : "Invalid auth token. Update your auth token:",
       }).then((authToken) => {
-        done({ authToken });
         cache["auth-token"] = {
           data: authToken,
           expires: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
         };
-        writeCache(cache);
+        writeCache(cache).then(() => {
+          done({ authToken });
+        });
       });
     } else {
       done({ authToken: cachedAuthToken });
