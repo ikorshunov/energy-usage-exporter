@@ -21,16 +21,10 @@ export const getMeteringPoints = async (params: {
   const result = [];
   for (let i = 0; i < meteringPointChunks.length; i++) {
     const chunk = meteringPointChunks[i];
-    const resultChunk = await makeApiRequest(
-      "/meteringpoint/getdetails",
-      "POST",
-      {
-        meteringPoints: {
-          meteringPoint: chunk,
-        },
-      },
-      undefined,
-      (data): MeteringPoint[] => {
+    const resultChunk = await makeApiRequest("/meteringpoint/getdetails", {
+      method: "POST",
+      body: { meteringPoints: { meteringPoint: chunk } },
+      transform: (data): MeteringPoint[] => {
         return (data as Array<{ result: MeteringPoint; success: boolean }>)
           .filter((item) => item.success)
           .map((item) => {
@@ -45,8 +39,8 @@ export const getMeteringPoints = async (params: {
               cityName: meteringPoint.cityName,
             };
           });
-      }
-    ).catch(() => {
+      },
+    }).catch(() => {
       return [];
     });
     result.push(...resultChunk);

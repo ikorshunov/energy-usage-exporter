@@ -3,15 +3,30 @@ import { getCache, sleep, writeCache } from "../utils.js";
 const API_URL = "https://api.eloverblik.dk/thirdpartyapi/api";
 const UI_DELAY = 1000;
 
+type MakeApiRequestParams<Result, Body> = {
+  method: "GET" | "POST" | "PUT" | "DELETE";
+  body: Body;
+  headers: RequestInit["headers"];
+  transform: (data: unknown) => Result;
+  onCacheResult: (
+    cacheResult: { data: Result; expires: number } | null
+  ) => void;
+  onCacheWrite: VoidFunction;
+};
+
 export const makeApiRequest = <
   Result,
-  T extends Record<string, unknown> = Record<string, unknown>
+  Body extends Record<string, unknown> = Record<string, unknown>
 >(
   endpoint: string,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: T,
-  headers?: RequestInit["headers"],
-  transform?: (data: unknown) => Result
+  {
+    method = "GET",
+    body,
+    headers,
+    transform,
+    onCacheResult = () => {},
+    onCacheWrite = () => {},
+  }: Partial<MakeApiRequestParams<Result, Body>> = {}
 ): Promise<Result> => {
   const url = encodeURI(`${API_URL}${endpoint}`);
   return getCache().then((cache) => {
@@ -20,6 +35,11 @@ export const makeApiRequest = <
       cacheKey += `:${JSON.stringify(body)}`;
     }
     const cacheEntry = cache[cacheKey];
+    onCacheResult(
+      cacheEntry
+        ? { data: cacheEntry.data as Result, expires: cacheEntry.expires }
+        : null
+    );
     if (cacheEntry && cacheEntry.expires > Date.now()) {
       return cacheEntry.data as Result;
     }
@@ -56,9 +76,8 @@ export const makeApiRequest = <
             data,
             expires: Date.now() + 1000 * 60 * 60 * 24, // 24 hours
           };
-          writeCache(cache);
-
-          return data;
+          onCacheWrite();
+          return writeCache(cache).then(() => data as Result);
         });
     });
   });

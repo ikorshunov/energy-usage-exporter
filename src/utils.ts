@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs/promises";
-import fsSync, { write } from "fs";
 import { Cache } from "./types.js";
 
 const cacheFilePath = path.resolve(import.meta.dirname, "cache.json");
@@ -10,11 +9,7 @@ export function sleep(millis: number) {
 }
 
 export const writeCache = (cache: Cache) => {
-  try {
-    fsSync.writeFileSync(cacheFilePath, JSON.stringify(cache));
-  } catch (e) {
-    console.error("Failed to write cache file", e);
-  }
+  return fs.writeFile(cacheFilePath, JSON.stringify(cache));
 };
 
 export const getCache = (): Promise<Cache> => {
