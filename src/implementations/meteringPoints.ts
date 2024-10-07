@@ -1,5 +1,5 @@
 import { confirm } from "@inquirer/prompts";
-import { getMeteringPoints } from "../api/getMeteringPoints.js";
+import { getMeteringPointIds } from "../api/getMeteringPointIds.js";
 import { getInitialAggregatedMeteringPointsData } from "../config.js";
 import { OperationImplementationParams } from "../engine/types.js";
 import { loader } from "../prompts/loader.js";
@@ -8,8 +8,10 @@ import {
   MeteringPoint,
   TaskOperationsData,
 } from "../types.js";
+import { chunkLoader } from "../prompts/chunkLoader.js";
+import { getMeteringPointDetails } from "../api/getMeteringPointDetails.js";
 
-export const meteringPoints = ({
+export const meteringPoints = async ({
   done,
   getData,
   retry,
@@ -17,68 +19,90 @@ export const meteringPoints = ({
   const { customerIdType } = getData("customer-id-type");
   const { customerIdValue = "" } = getData("customer-id-value");
   const startLoading = () =>
-    getMeteringPoints({ customerIdType, customerIdValue });
+    getMeteringPointIds({ customerIdType, customerIdValue });
 
-  loader({
-    startLoading,
-    message: (status) => {
-      if (status === "pending") {
-        return "Requesting metering points";
-      }
-      if (status === "success") {
-        return "Metering points received";
-      }
-      return "Failed to get metering points:";
+  const meteringPointIds: string[] = (await loader(
+    {
+      startLoading,
+      message: (status) => {
+        if (status === "pending") {
+          return "Requesting metering point IDs";
+        }
+        if (status === "success") {
+          return "Metering point IDs received";
+        }
+        return "Failed to get metering points:";
+      },
     },
-  }).then((meteringPointList) => {
-    if (meteringPointList === null) {
-      retry(); // TODO limit retries
-    } else {
-      const list = meteringPointList as MeteringPoint[];
-      const aggregatedData: AggregatedMeteringPointsData = list.reduce(
-        (acc, meteringPoint) => {
-          const { streetName, buildingNumber } = meteringPoint;
-          if (!(streetName in acc.data)) {
-            acc.data[streetName] = {
-              [buildingNumber]: [meteringPoint],
-            };
-            acc.totalStreets++;
-            acc.totalBuildings++;
-          } else if (!(buildingNumber in acc.data[streetName])) {
-            acc.data[streetName][buildingNumber] = [meteringPoint];
-            acc.totalBuildings++;
-          } else {
-            acc.data[streetName][buildingNumber].push(meteringPoint);
-          }
-          return acc;
-        },
-        getInitialAggregatedMeteringPointsData()
-      );
-      const { totalStreets, totalBuildings } = aggregatedData;
-      if (totalStreets === 0) {
-        return confirm({
-          message:
-            "No metering points found. Do you want to try another customer?",
-        }).then((bool) => {
-          if (bool) {
-            retry("customer-id-type");
-          }
-        });
-      }
-
-      const totalStreetsText = totalStreets === 1 ? "street" : "streets";
-      const totalBuildingsText =
-        totalBuildings === 1 ? "building" : "buildings";
-      const totalMeteringPointsText =
-        list.length === 1 ? "metering point" : "metering points";
-
-      const message = `Found ${list.length} ${totalMeteringPointsText} in ${totalBuildings} ${totalBuildingsText} on ${totalStreets} ${totalStreetsText}`;
-      return loader({
-        message: () => message,
-        startLoading: () => Promise.resolve(),
-      }).then(() => {
-        done({ meteringPoints: aggregatedData });
-      });
+    {
+      clearPromptOnDone: true,
     }
+  )) as string[];
+
+  if (meteringPointIds === null) {
+    return retry(); // TODO limit retries
+  }
+
+  if (meteringPointIds.length === 0) {
+    return confirm({
+      message: "No metering points found. Do you want to try another customer?",
+    }).then((bool) => {
+      if (bool) {
+        retry("customer-id-type");
+      }
+    });
+  }
+
+  const loadedMeteringPointIds: string[] = [];
+  let aggregatedData: AggregatedMeteringPointsData =
+    getInitialAggregatedMeteringPointsData();
+
+  await chunkLoader(
+    {
+      chunkSize: 10,
+      items: meteringPointIds as string[],
+      startLoadingChunk: async (chunk) => {
+        const meteringPoints = await getMeteringPointDetails(chunk as string[]);
+        loadedMeteringPointIds.push(
+          ...meteringPoints.map((mp) => mp.meteringPointId)
+        );
+        aggregatedData = (meteringPoints as MeteringPoint[]).reduce(
+          (acc, meteringPoint) => {
+            const { streetName, buildingNumber } = meteringPoint;
+            if (!(streetName in acc.data)) {
+              acc.data[streetName] = {
+                [buildingNumber]: [meteringPoint],
+              };
+              acc.totalStreets++;
+              acc.totalBuildings++;
+            } else if (!(buildingNumber in acc.data[streetName])) {
+              acc.data[streetName][buildingNumber] = [meteringPoint];
+              acc.totalBuildings++;
+            } else {
+              acc.data[streetName][buildingNumber].push(meteringPoint);
+            }
+            return acc;
+          },
+          aggregatedData
+        );
+      },
+    },
+    {
+      clearPromptOnDone: true,
+    }
+  );
+
+  const { totalStreets, totalBuildings } = aggregatedData;
+  const totalStreetsText = totalStreets === 1 ? "street" : "streets";
+  const totalBuildingsText = totalBuildings === 1 ? "building" : "buildings";
+  const totalMeteringPointsText =
+    loadedMeteringPointIds.length === 1 ? "metering point" : "metering points";
+
+  const message = `Found ${loadedMeteringPointIds.length} ${totalMeteringPointsText} in ${totalBuildings} ${totalBuildingsText} on ${totalStreets} ${totalStreetsText}`;
+  return loader({
+    message: () => message,
+    startLoading: () => Promise.resolve(),
+  }).then(() => {
+    done({ meteringPoints: aggregatedData });
   });
 };
