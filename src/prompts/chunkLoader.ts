@@ -1,6 +1,7 @@
 import {
   createPrompt,
   makeTheme,
+  Status,
   useEffect,
   useKeypress,
   usePrefix,
@@ -19,7 +20,8 @@ export const chunkLoader = createPrompt<
   ChunkLoaderPromptConfig<unknown>
 >((config, done) => {
   const theme = makeTheme();
-  const prefix = usePrefix({ status: "loading", theme });
+  const [status, setStatus] = useState<Status>("loading");
+  const prefix = usePrefix({ status, theme });
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const { items, chunkSize, startLoadingChunk } = config;
 
@@ -34,25 +36,29 @@ export const chunkLoader = createPrompt<
 
   useKeypress((key) => {
     if (key.name === "escape") {
+      setStatus("done");
       done([]);
     }
   });
 
   useEffect(() => {
     if (currentChunkIndex === chunks.current.length) {
+      setStatus("done");
       done([]);
       return;
     }
 
-    if (chunks.current.length === 0) {
+    if (chunks.current.length === 0 || status === "done") {
       return;
     }
 
     const startLoading = chunks.current[currentChunkIndex];
     startLoading().then(() => {
-      setCurrentChunkIndex(currentChunkIndex + 1);
+      if (status === "loading") {
+        setCurrentChunkIndex(currentChunkIndex + 1);
+      }
     });
-  }, [currentChunkIndex]);
+  }, [currentChunkIndex, status]);
 
   return `${prefix} ${currentChunkIndex + 1}/${
     chunks.current.length
