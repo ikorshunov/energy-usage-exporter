@@ -7,6 +7,7 @@ import { customerIdValue } from "./implementations/customerIdValue.js";
 import { meteringPoints } from "./implementations/meteringPoints.js";
 import { selectedMeteringPoints } from "./implementations/selectedMeteringPoints.js";
 import path from "path";
+import { exportParams } from "./implementations/exportParams.js";
 
 export const cacheFilePath = path.resolve(`${import.meta.url}/cache`);
 
@@ -35,6 +36,11 @@ export const taskOperationsData: TaskOperationsData = {
   },
   "selected-metering-points": {
     meteringPointIds: [],
+  },
+  "export-params": {
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+    timeAggregation: "Hour",
   },
 };
 
@@ -67,6 +73,11 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   },
   "selected-metering-points": {
     id: "selected-metering-points",
+    nextOperationId: "export-params",
     implementation: selectedMeteringPoints,
+  },
+  "export-params": {
+    id: "export-params",
+    implementation: exportParams,
   },
 };

@@ -16,10 +16,12 @@ export const selectedMeteringPoints = ({
   const selectStreet = () => {
     return select({
       message: "Select street:",
-      choices: Object.keys(data).map((streetName) => ({
-        name: streetName,
-        value: streetName,
-      })),
+      choices: Object.keys(data)
+        .sort()
+        .map((streetName) => ({
+          name: streetName,
+          value: streetName,
+        })),
     });
   };
 

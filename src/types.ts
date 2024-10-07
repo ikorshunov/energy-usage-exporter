@@ -36,6 +36,11 @@ export type TaskOperationsData = {
   "selected-metering-points": {
     meteringPointIds: string[];
   };
+  "export-params": {
+    startDate: string;
+    endDate: string;
+    timeAggregation: "Hour" | "Year";
+  };
 };
 
 export type Cache = Record<

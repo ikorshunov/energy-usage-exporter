@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 import { Cache } from "./types.js";
+import { KeypressEvent } from "@inquirer/core";
 
 const cacheFilePath = path.resolve(import.meta.dirname, "cache.json");
 
