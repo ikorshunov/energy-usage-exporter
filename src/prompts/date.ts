@@ -2,7 +2,6 @@ import {
   createPrompt,
   makeTheme,
   Status,
-  useEffect,
   useKeypress,
   usePrefix,
   useState,
@@ -103,22 +102,26 @@ export const datePrompt = createPrompt<string, DatePromptConfig>(
       }
     });
 
-    return [
-      `${prefix} ${theme.style.message(message, status)} ${dateArr
-        .map((entry, index) => {
-          let stringEntry = entry.toString();
-          if (stringEntry.length === 1 && (index === 1 || index === 2)) {
-            stringEntry = `0${stringEntry}`;
-          } else if (index === 0 && stringEntry.length < 4) {
-            stringEntry = "0".repeat(4 - stringEntry.length) + stringEntry;
-          }
+    let value = dateArr
+      .map((entry, index) => {
+        let stringEntry = entry.toString();
+        if (stringEntry.length === 1 && (index === 1 || index === 2)) {
+          stringEntry = `0${stringEntry}`;
+        } else if (index === 0 && stringEntry.length < 4) {
+          stringEntry = "0".repeat(4 - stringEntry.length) + stringEntry;
+        }
 
-          if (index === dateArrIndex) {
-            return theme.style.highlight(stringEntry);
-          }
-          return stringEntry;
-        })
-        .join("-")}${cursorHide}`,
+        if (index === dateArrIndex && status !== "done") {
+          return theme.style.highlight(stringEntry);
+        }
+        return stringEntry;
+      })
+      .join("-");
+
+    value = status === "done" ? theme.style.answer(value) : value;
+
+    return [
+      `${prefix} ${theme.style.message(message, status)} ${value}${cursorHide}`,
       isError ? theme.style.error(errorMessage || "Invalid input") : undefined,
     ] as const;
   }
