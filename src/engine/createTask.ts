@@ -1,3 +1,4 @@
+import readline from "readline";
 import { createOperation } from "./createOperation.js";
 import { getInitialOperationId } from "./utils.js";
 import {
@@ -20,6 +21,18 @@ export function createTask<
 
   const taskApi: TaskApi<OperationId, OperationsData> = {
     run: () => {
+      readline.emitKeypressEvents(process.stdin);
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(true);
+      }
+
+      process.stdin.on("keypress", (_chunk, key) => {
+        if (key.ctrl && key.name === "c") {
+          process.stdout.write("\n");
+          process.exit();
+        }
+      });
+
       taskApi.runOperation(taskState.currentOperationId);
     },
     runOperation: (operationId) => {
