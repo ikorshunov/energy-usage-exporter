@@ -1,4 +1,4 @@
-import { select } from "@inquirer/prompts";
+import { select, search } from "@inquirer/prompts";
 import { OperationImplementationParams } from "../engine/types.js";
 import { TaskOperationsData } from "../types.js";
 
@@ -14,14 +14,21 @@ export const selectedMeteringPoints = ({
   } = getData("metering-points");
 
   const selectStreet = () => {
-    return select({
+    return search({
       message: "Select street:",
-      choices: Object.keys(data)
-        .sort()
-        .map((streetName) => ({
+      source: (search) => {
+        const allStreetNames = Object.keys(data);
+        const foundStreetNames = search
+          ? allStreetNames.filter((streetName) =>
+              streetName.toLowerCase().includes(search.toLowerCase())
+            )
+          : allStreetNames;
+
+        return foundStreetNames.sort().map((streetName) => ({
           name: streetName,
           value: streetName,
-        })),
+        }));
+      },
     });
   };
 
