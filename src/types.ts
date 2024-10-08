@@ -42,8 +42,9 @@ export type TaskOperationsData = {
     timeAggregation: "Hour" | "Year";
   };
   "export-data": {
-    exportData: unknown;
+    exportData: LocalEnergyUsage;
   };
+  "generate-files": {};
 };
 
 export type Cache = Record<

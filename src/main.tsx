@@ -11,6 +11,6 @@ run();
 2) Handle expired token
 3) Handle API unavailable (too many request, limit exceeded)
 4) Search directly by meter id
-5) Create file from results
+    5) Create file from results
     6) Handle ctrl+c
 */

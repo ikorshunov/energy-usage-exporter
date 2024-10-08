@@ -9,6 +9,7 @@ import { meteringPoints } from "./implementations/meteringPoints.js";
 import { selectedMeteringPoints } from "./implementations/selectedMeteringPoints.js";
 import { exportParams } from "./implementations/exportParams.js";
 import { exportData } from "./implementations/exportData.js";
+import { generateFiles } from "./implementations/generateFiles.js";
 
 export const cacheFilePath = path.resolve(`${import.meta.url}/cache`);
 
@@ -44,8 +45,9 @@ export const taskOperationsData: TaskOperationsData = {
     timeAggregation: "Hour",
   },
   "export-data": {
-    exportData: {},
+    exportData: [],
   },
+  "generate-files": {},
 };
 
 export const taskConfig: TaskConfig<TaskOperationsData> = {
@@ -87,6 +89,11 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   },
   "export-data": {
     id: "export-data",
+    nextOperationId: "generate-files",
     implementation: exportData,
+  },
+  "generate-files": {
+    id: "generate-files",
+    implementation: generateFiles,
   },
 };

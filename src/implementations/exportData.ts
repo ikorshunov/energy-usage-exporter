@@ -1,7 +1,7 @@
 import { getEnergyUsage } from "../api/getEnergyUsage.js";
 import { OperationImplementationParams } from "../engine/types.js";
 import { loader } from "../prompts/loader.js";
-import { TaskOperationsData } from "../types.js";
+import { LocalEnergyUsage, TaskOperationsData } from "../types.js";
 
 export const exportData = async ({
   getData,
@@ -18,7 +18,7 @@ export const exportData = async ({
     });
   };
 
-  const exportData = await loader({
+  const exportData = (await loader({
     startLoading,
     message: (status) => {
       if (status === "pending") {
@@ -29,6 +29,6 @@ export const exportData = async ({
       }
       return "Failed to get energy usage data:";
     },
-  });
+  })) as LocalEnergyUsage;
   done({ exportData });
 };
