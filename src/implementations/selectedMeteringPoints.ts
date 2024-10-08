@@ -1,10 +1,12 @@
 import { select, search } from "@inquirer/prompts";
 import { OperationImplementationParams } from "../engine/types.js";
 import { TaskOperationsData } from "../types.js";
+import { KeypressEvent } from "@inquirer/core";
 
 export const selectedMeteringPoints = ({
   getData,
   done,
+  retry,
 }: OperationImplementationParams<
   "selected-metering-points",
   TaskOperationsData
@@ -33,17 +35,37 @@ export const selectedMeteringPoints = ({
   };
 
   const selectBuilding = (streetName: string) => {
-    return select({
-      message: "Select building:",
-      choices: Object.keys(data[streetName]).map((buildingNumber) => ({
-        name: `${streetName} ${buildingNumber} (meters: ${data[streetName][buildingNumber].length})`,
-        value: data[streetName][buildingNumber].map(
-          (meteringPoint) => meteringPoint.meteringPointId
-        ),
-      })),
-    }).then((meteringPointIds) => {
-      done({ meteringPointIds });
-    });
+    const controller = new AbortController();
+    const handler = (_: any, key: KeypressEvent) => {
+      if (key.name === "escape") {
+        controller.abort();
+      }
+    };
+    process.stdin.on("keypress", handler);
+
+    return select(
+      {
+        message: "Select building:",
+        choices: Object.keys(data[streetName]).map((buildingNumber) => ({
+          name: `${streetName} ${buildingNumber} (meters: ${data[streetName][buildingNumber].length})`,
+          value: data[streetName][buildingNumber].map(
+            (meteringPoint) => meteringPoint.meteringPointId
+          ),
+        })),
+      },
+      {
+        signal: controller.signal,
+      }
+    )
+      .then((meteringPointIds) => {
+        done({ meteringPointIds });
+      })
+      .catch(() => {
+        retry();
+      })
+      .finally(() => {
+        process.stdin.off("keypress", handler);
+      });
   };
 
   if (totalStreets === 1) {

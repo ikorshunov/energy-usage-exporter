@@ -28,6 +28,7 @@ export function createTask<
 
       process.stdin.on("keypress", (_chunk, key) => {
         if (key.ctrl && key.name === "c") {
+          process.stdout.clearScreenDown();
           process.stdout.write("\n");
           process.exit();
         }
