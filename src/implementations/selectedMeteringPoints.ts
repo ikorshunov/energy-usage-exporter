@@ -36,7 +36,7 @@ export const selectedMeteringPoints = ({
     return select({
       message: "Select building:",
       choices: Object.keys(data[streetName]).map((buildingNumber) => ({
-        name: `${streetName} ${buildingNumber}`,
+        name: `${streetName} ${buildingNumber} (meters: ${data[streetName][buildingNumber].length})`,
         value: data[streetName][buildingNumber].map(
           (meteringPoint) => meteringPoint.meteringPointId
         ),

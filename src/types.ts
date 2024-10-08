@@ -41,6 +41,9 @@ export type TaskOperationsData = {
     endDate: string;
     timeAggregation: "Hour" | "Year";
   };
+  "export-data": {
+    exportData: unknown;
+  };
 };
 
 export type Cache = Record<

@@ -8,10 +8,7 @@ type MakeApiRequestParams<Result, Body> = {
   body: Body;
   headers: RequestInit["headers"];
   transform: (data: unknown) => Result;
-  onCacheResult: (
-    cacheResult: { data: Result; expires: number } | null
-  ) => void;
-  onCacheWrite: VoidFunction;
+  expiresIn?: number;
 };
 
 export const makeApiRequest = <
@@ -24,8 +21,7 @@ export const makeApiRequest = <
     body,
     headers,
     transform,
-    onCacheResult = () => {},
-    onCacheWrite = () => {},
+    expiresIn = 1000 * 60 * 60 * 24, // 24 hours
   }: Partial<MakeApiRequestParams<Result, Body>> = {}
 ): Promise<Result> => {
   const url = encodeURI(`${API_URL}${endpoint}`);
@@ -35,11 +31,6 @@ export const makeApiRequest = <
       cacheKey += `:${JSON.stringify(body)}`;
     }
     const cacheEntry = cache[cacheKey];
-    onCacheResult(
-      cacheEntry
-        ? { data: cacheEntry.data as Result, expires: cacheEntry.expires }
-        : null
-    );
     if (cacheEntry && cacheEntry.expires > Date.now()) {
       return cacheEntry.data as Result;
     }
@@ -72,11 +63,14 @@ export const makeApiRequest = <
           return Promise.reject(response);
         })
         .then((data) => {
+          if (expiresIn === 0) {
+            return data as Result;
+          }
+
           cache[cacheKey] = {
             data,
-            expires: Date.now() + 1000 * 60 * 60 * 24, // 24 hours
+            expires: Date.now() + expiresIn,
           };
-          onCacheWrite();
           return writeCache(cache).then(() => data as Result);
         });
     });
