@@ -7,6 +7,7 @@ import {
   useState,
 } from "@inquirer/core";
 import colors from "yoctocolors";
+import { getStringDateArr } from "../utils.js";
 
 type DatePromptConfig = {
   default?: string;
@@ -35,7 +36,11 @@ export const datePrompt = createPrompt<string, DatePromptConfig>(
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    const [dateArr, setDateArr] = useState([year, month, day] as const);
+    const [dateArr, setDateArr] = useState<[number, number, number]>([
+      year,
+      month,
+      day,
+    ]);
     const [dateArrIndex, setDateArrIndex] = useState(0);
 
     const updateDateValue = (value: typeof dateArr) => {
@@ -94,7 +99,7 @@ export const datePrompt = createPrompt<string, DatePromptConfig>(
           ]);
         }
       } else if (key.name === "return") {
-        const value = dateArr.join("-");
+        const value = getStringDateArr(dateArr).join("-");
         if (!isError) {
           setStatus("done");
           done(value);
@@ -102,19 +107,12 @@ export const datePrompt = createPrompt<string, DatePromptConfig>(
       }
     });
 
-    let value = dateArr
+    let value = getStringDateArr(dateArr)
       .map((entry, index) => {
-        let stringEntry = entry.toString();
-        if (stringEntry.length === 1 && (index === 1 || index === 2)) {
-          stringEntry = `0${stringEntry}`;
-        } else if (index === 0 && stringEntry.length < 4) {
-          stringEntry = "0".repeat(4 - stringEntry.length) + stringEntry;
-        }
-
         if (index === dateArrIndex && status !== "done") {
-          return theme.style.highlight(stringEntry);
+          return theme.style.highlight(entry);
         }
-        return stringEntry;
+        return entry;
       })
       .join("-");
 

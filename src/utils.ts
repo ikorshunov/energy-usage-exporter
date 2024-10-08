@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
 import { Cache } from "./types.js";
-import { KeypressEvent } from "@inquirer/core";
 
 const cacheFilePath = path.resolve(import.meta.dirname, "cache.json");
 
@@ -25,4 +24,16 @@ export const getCache = (): Promise<Cache> => {
       const cache = JSON.parse(data);
       return cache;
     });
+};
+
+export const getStringDateArr = (dateArr: [number, number, number]) => {
+  return dateArr.map((entry, index) => {
+    let stringEntry = entry.toString();
+    if (stringEntry.length === 1 && (index === 1 || index === 2)) {
+      stringEntry = `0${stringEntry}`;
+    } else if (index === 0 && stringEntry.length < 4) {
+      stringEntry = "0".repeat(4 - stringEntry.length) + stringEntry;
+    }
+    return stringEntry;
+  });
 };

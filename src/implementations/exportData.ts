@@ -1,9 +1,7 @@
-import { writeFile } from "fs/promises";
 import { getEnergyUsage } from "../api/getEnergyUsage.js";
 import { OperationImplementationParams } from "../engine/types.js";
 import { loader } from "../prompts/loader.js";
 import { TaskOperationsData } from "../types.js";
-import path from "path";
 
 export const exportData = async ({
   getData,
@@ -32,11 +30,5 @@ export const exportData = async ({
       return "Failed to get energy usage data:";
     },
   });
-  // TODO remove
-  writeFile(
-    path.resolve(import.meta.dirname, "../", "exportData.json"),
-    JSON.stringify(exportData, null, 2)
-  ).then(() => {
-    done({ exportData });
-  });
+  done({ exportData });
 };
