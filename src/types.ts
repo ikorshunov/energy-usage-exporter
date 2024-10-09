@@ -24,6 +24,9 @@ export type TaskOperationsData = {
   "data-access-token": {
     dataAccessToken?: string;
   };
+  "has-metering-point": {
+    meteringPointId?: string;
+  };
   "customer-id-type": {
     customerIdType: CustomerIdType;
   };

@@ -10,6 +10,7 @@ import { selectedMeteringPoints } from "./implementations/selectedMeteringPoints
 import { exportParams } from "./implementations/exportParams.js";
 import { exportData } from "./implementations/exportData.js";
 import { generateFiles } from "./implementations/generateFiles.js";
+import { hasMeteringPoint } from "./implementations/hasMeteringPoint.js";
 
 export const cacheFilePath = path.resolve(`${import.meta.url}/cache`);
 
@@ -26,6 +27,9 @@ export const taskOperationsData: TaskOperationsData = {
   },
   "data-access-token": {
     dataAccessToken: undefined,
+  },
+  "has-metering-point": {
+    meteringPointId: undefined,
   },
   "customer-id-type": {
     customerIdType: "customerKey",
@@ -59,8 +63,14 @@ export const taskConfig: TaskConfig<TaskOperationsData> = {
   },
   "data-access-token": {
     id: "data-access-token",
-    nextOperationId: "customer-id-type",
+    nextOperationId: "has-metering-point",
     implementation: dataAccessToken,
+  },
+  "has-metering-point": {
+    id: "has-metering-point",
+    nextOperationId: ({ meteringPointId }) =>
+      meteringPointId ? "export-params" : "customer-id-type",
+    implementation: hasMeteringPoint,
   },
   "customer-id-type": {
     id: "customer-id-type",

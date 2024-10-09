@@ -22,6 +22,7 @@ export const generateFiles = async ({
         });
       } catch (error) {
         console.error(error);
+        done({});
       }
     }
   };
@@ -35,7 +36,7 @@ export const generateFiles = async ({
           : "Generating file...";
       }
       if (status === "success") {
-        return "Energy usage data exported. Hope this is helpful, Sebastian :)";
+        return "Værsgo, Sebastian :)";
       }
       return "Failed to export data";
     },

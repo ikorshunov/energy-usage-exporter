@@ -4,6 +4,7 @@ import {
   usePrefix,
   useState,
   makeTheme,
+  useEffect,
 } from "@inquirer/core";
 
 type LoaderPromptConfig<StartLoadingFunction> = {
@@ -20,16 +21,18 @@ export const loader = createPrompt<
   const [errorMessage, setErrorMessage] = useState<string>();
   const prefix = usePrefix({ status, theme });
 
-  startLoading()
-    .then((result) => {
-      setStatus("done");
-      done(result);
-    })
-    .catch((error) => {
-      setStatus("idle");
-      setErrorMessage(error.statusText);
-      done(null);
-    });
+  useEffect(() => {
+    startLoading()
+      .then((result) => {
+        setStatus("done");
+        done(result);
+      })
+      .catch((error) => {
+        setStatus("idle");
+        setErrorMessage(error.statusText);
+        done(null);
+      });
+  }, []);
 
   let themeMessage: string = "";
   let themePrefix: string = prefix;
