@@ -9,20 +9,30 @@ export const dataAccessToken = ({
   retry,
 }: OperationImplementationParams<"data-access-token", TaskOperationsData>) => {
   const { authToken = "" } = getData("auth-token");
-  const startLoading = () => getDataAccessToken(authToken);
+  const { customerIdValue } = getData("customer-id-value");
+  const { meteringPointId } = getData("has-metering-point");
+  const ignoreCache = Boolean(customerIdValue || meteringPointId);
+  const startLoading = () => getDataAccessToken(authToken, ignoreCache);
 
-  loader({
-    startLoading,
-    message: (status) => {
-      if (status === "pending") {
-        return "Requesting data access token";
-      }
-      if (status === "success") {
-        return "Data access token received";
-      }
-      return "Failed to get data access token:";
+  loader(
+    {
+      startLoading,
+      message: (status) => {
+        if (status === "pending") {
+          return ignoreCache
+            ? "Updating data access token"
+            : "Requesting data access token";
+        }
+        if (status === "success") {
+          return "Data access token received";
+        }
+        return "Failed to get data access token:";
+      },
     },
-  }).then((dataAccessToken) => {
+    {
+      clearPromptOnDone: true,
+    }
+  ).then(([dataAccessToken]) => {
     if (dataAccessToken) {
       process.env.ENUEX_DATA_ACCESS_TOKEN = dataAccessToken as string;
       done({ dataAccessToken: dataAccessToken as string });

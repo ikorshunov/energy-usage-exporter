@@ -16,7 +16,7 @@ type ChunkLoaderPromptConfig<Item> = {
 };
 
 export const chunkLoader = createPrompt<
-  unknown,
+  [unknown, { status: number } | undefined],
   ChunkLoaderPromptConfig<unknown>
 >((config, done) => {
   const theme = makeTheme();
@@ -37,14 +37,14 @@ export const chunkLoader = createPrompt<
   useKeypress((key) => {
     if (key.name === "escape") {
       setStatus("done");
-      done([]);
+      done([[], undefined]);
     }
   });
 
   useEffect(() => {
     if (currentChunkIndex === chunks.current.length) {
       setStatus("done");
-      done([]);
+      done([[], undefined]);
       return;
     }
 
@@ -53,11 +53,20 @@ export const chunkLoader = createPrompt<
     }
 
     const startLoading = chunks.current[currentChunkIndex];
-    startLoading().then(() => {
-      if (status === "loading") {
-        setCurrentChunkIndex(currentChunkIndex + 1);
-      }
-    });
+    startLoading()
+      .then(() => {
+        if (status === "loading") {
+          setCurrentChunkIndex(currentChunkIndex + 1);
+        }
+      })
+      .catch((error) => {
+        setStatus("done");
+        if (typeof error === "object" && error !== null) {
+          done([null, { status: error.status }]);
+        } else {
+          done([null, { status: -1 }]);
+        }
+      });
   }, [currentChunkIndex, status]);
 
   return `${prefix} ${currentChunkIndex + 1}/${

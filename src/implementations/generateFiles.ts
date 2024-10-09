@@ -2,6 +2,7 @@ import { OperationImplementationParams } from "../engine/types.js";
 import { loader } from "../prompts/loader.js";
 import { TaskOperationsData } from "../types.js";
 import writeXlsxFile from "write-excel-file/node";
+import { confirm } from "@inquirer/prompts";
 
 export const generateFiles = async ({
   getData,
@@ -41,5 +42,9 @@ export const generateFiles = async ({
       return "Failed to export data";
     },
   });
-  done({});
+
+  const restart = await confirm({
+    message: "Would you like to start new export, sweetie?",
+  });
+  done({}, restart);
 };

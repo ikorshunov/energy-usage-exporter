@@ -9,6 +9,7 @@ type MakeApiRequestParams<Result, Body> = {
   headers: RequestInit["headers"];
   transform: (data: unknown) => Result;
   expiresIn?: number;
+  ignoreCache?: boolean;
 };
 
 export const makeApiRequest = <
@@ -21,6 +22,7 @@ export const makeApiRequest = <
     body,
     headers,
     transform,
+    ignoreCache = false,
     expiresIn = 1000 * 60 * 60 * 24, // 24 hours
   }: Partial<MakeApiRequestParams<Result, Body>> = {}
 ): Promise<Result> => {
@@ -31,7 +33,7 @@ export const makeApiRequest = <
       cacheKey += `:${JSON.stringify(body)}`;
     }
     const cacheEntry = cache[cacheKey];
-    if (cacheEntry && cacheEntry.expires > Date.now()) {
+    if (cacheEntry && cacheEntry.expires > Date.now() && !ignoreCache) {
       return cacheEntry.data as Result;
     }
 

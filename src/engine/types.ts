@@ -13,7 +13,10 @@ export type OperationImplementationParams<
   done: (
     data:
       | OperationsData[OperationId]
-      | ((prevData: OperationsData[OperationId]) => OperationsData[OperationId])
+      | ((
+          prevData: OperationsData[OperationId]
+        ) => OperationsData[OperationId]),
+    restart?: boolean
   ) => void;
   retry: {
     <Id extends keyof OperationsData>(operationId: Id): void;
@@ -84,4 +87,5 @@ export type TaskApi<
     operationId: Id,
     data: OperationsData[Id]
   ) => void;
+  restart: () => void;
 };

@@ -6,6 +6,7 @@ import { LocalEnergyUsage, TaskOperationsData } from "../types.js";
 export const exportData = async ({
   getData,
   done,
+  retry,
 }: OperationImplementationParams<"export-data", TaskOperationsData>) => {
   const { startDate, endDate, timeAggregation } = getData("export-params");
   const { meteringPointIds } = getData("selected-metering-points");
@@ -19,7 +20,7 @@ export const exportData = async ({
     });
   };
 
-  const exportData = (await loader(
+  const [exportData, error] = await loader(
     {
       startLoading,
       message: (status) => {
@@ -35,6 +36,16 @@ export const exportData = async ({
     {
       clearPromptOnDone: true,
     }
-  )) as LocalEnergyUsage;
-  done({ exportData });
+  );
+
+  if (error) {
+    if (error.status === 401) {
+      return retry("data-access-token");
+    } else {
+      console.log("\nUnknown error\n");
+      process.exit(1);
+    }
+  }
+
+  done({ exportData: exportData as LocalEnergyUsage });
 };

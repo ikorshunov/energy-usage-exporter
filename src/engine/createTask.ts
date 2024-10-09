@@ -67,6 +67,19 @@ export function createTask<
         ...data,
       };
     },
+    restart: () => {
+      const operations = taskState.operations;
+      if (!operations) {
+        throw new Error("Operations have not been initialized.");
+      }
+      (Object.keys(operations) as OperationId[]).forEach((operationId) => {
+        operations[operationId].data = initialData[operationId];
+      });
+      taskState.currentOperationId = getInitialOperationId(config);
+      taskState.prevOperationIds = [];
+
+      taskApi.runOperation(taskState.currentOperationId);
+    },
   };
 
   const stepIds = Object.keys(config) as OperationId[];

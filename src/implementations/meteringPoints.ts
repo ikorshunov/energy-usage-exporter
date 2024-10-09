@@ -21,7 +21,7 @@ export const meteringPoints = async ({
   const startLoading = () =>
     getMeteringPointIds({ customerIdType, customerIdValue });
 
-  const meteringPointIds: string[] = (await loader(
+  const [meteringPointIds, meteringPointsError] = await loader(
     {
       startLoading,
       message: (status) => {
@@ -37,13 +37,18 @@ export const meteringPoints = async ({
     {
       clearPromptOnDone: true,
     }
-  )) as string[];
+  );
 
-  if (meteringPointIds === null) {
-    return retry(); // TODO limit retries
+  if (meteringPointsError) {
+    if (meteringPointsError.status === 401) {
+      return retry("data-access-token");
+    } else {
+      console.log("\nUnknown error\n");
+      process.exit(1);
+    }
   }
 
-  if (meteringPointIds.length === 0) {
+  if ((meteringPointIds as string[]).length === 0) {
     return confirm({
       message: "No metering points found. Do you want to try another customer?",
     }).then((bool) => {
@@ -57,7 +62,7 @@ export const meteringPoints = async ({
   let aggregatedData: AggregatedMeteringPointsData =
     getInitialAggregatedMeteringPointsData();
 
-  await chunkLoader(
+  const [_, meteringPointDetailsError] = await chunkLoader(
     {
       chunkSize: 10,
       items: meteringPointIds as string[],
@@ -91,6 +96,15 @@ export const meteringPoints = async ({
       clearPromptOnDone: true,
     }
   );
+
+  if (meteringPointDetailsError) {
+    if (meteringPointDetailsError.status === 401) {
+      return retry("data-access-token");
+    } else {
+      console.log("\nUnknown error\n");
+      process.exit(1);
+    }
+  }
 
   const { totalStreets, totalBuildings } = aggregatedData;
   const totalStreetsText = totalStreets === 1 ? "street" : "streets";

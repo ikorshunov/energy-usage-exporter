@@ -24,7 +24,7 @@ export function createOperation<
       }
       return taskApi.getOperationData(operationId);
     },
-    done: (data) => {
+    done: (data, restart = false) => {
       let operationData: OperationsData[OperationId];
       if (typeof data === "function") {
         const prevData = taskApi.getOperationData(config.id);
@@ -40,6 +40,8 @@ export function createOperation<
             ? config.nextOperationId(operationData)
             : config.nextOperationId;
         taskApi.runOperation(nextOperationId as unknown as OperationId);
+      } else if (restart) {
+        taskApi.restart();
       } else {
         process.exit(0);
       }

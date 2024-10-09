@@ -13,7 +13,7 @@ type LoaderPromptConfig<StartLoadingFunction> = {
 };
 
 export const loader = createPrompt<
-  unknown,
+  [unknown, { status: number } | undefined],
   LoaderPromptConfig<() => Promise<unknown>>
 >(({ startLoading, message }, done) => {
   const theme = makeTheme();
@@ -25,12 +25,17 @@ export const loader = createPrompt<
     startLoading()
       .then((result) => {
         setStatus("done");
-        done(result);
+        done([result, undefined]);
       })
       .catch((error) => {
         setStatus("idle");
-        setErrorMessage(error.statusText);
-        done(null);
+        if (typeof error === "object" && error !== null) {
+          setErrorMessage(error.message);
+          done([null, { status: error.status }]);
+        } else {
+          setErrorMessage("Unknown error");
+          done([null, { status: -1 }]);
+        }
       });
   }, []);
 
