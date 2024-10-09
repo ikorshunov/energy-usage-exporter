@@ -23,11 +23,14 @@ export type OperationImplementationParams<
 
 export type OperationConfig<
   OperationId extends string,
-  OperationsData extends UnknownOperationsData
+  OperationsData extends UnknownOperationsData,
+  NextOperationId = Exclude<keyof OperationsData, OperationId>
 > = {
   id: OperationId;
   isInitial?: boolean;
-  nextOperationId?: Exclude<keyof OperationsData, OperationId>;
+  nextOperationId?:
+    | NextOperationId
+    | ((data: OperationsData[OperationId]) => NextOperationId);
   implementation: (
     params: OperationImplementationParams<OperationId, OperationsData>
   ) => void;

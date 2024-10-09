@@ -25,15 +25,23 @@ export function createOperation<
       return taskApi.getOperationData(operationId);
     },
     done: (data) => {
+      let operationData: OperationsData[OperationId];
       if (typeof data === "function") {
         const prevData = taskApi.getOperationData(config.id);
-        taskApi.setOperationData(config.id, data(prevData));
+        operationData = data(prevData);
       } else {
-        taskApi.setOperationData(config.id, data);
+        operationData = data;
       }
+      taskApi.setOperationData(config.id, operationData);
 
       if (config.nextOperationId) {
-        taskApi.runOperation(config.nextOperationId as unknown as OperationId);
+        const nextOperationId =
+          typeof config.nextOperationId === "function"
+            ? config.nextOperationId(operationData)
+            : config.nextOperationId;
+        taskApi.runOperation(nextOperationId as unknown as OperationId);
+      } else {
+        process.exit(0);
       }
     },
     retry: (operationId?: OperationId) => {
